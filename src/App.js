@@ -174,8 +174,8 @@ function App () {
               <>
                 <h2>{pinyin}</h2>
                 <>
-                  {defs.map(d => (
-                    <span key={d}>{d}</span>
+                  {defs.map((d, i) => (
+                    <span key={d}>{d}{i === defs.length - 1 ? '' : ', '}</span> 
                   ))}
                 </>
               </>
