@@ -1,13 +1,75 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html, body {
+  height: 100vh;
+  width: 100vw;
+  margin: 0px;
+  padding: 0px;
+  overflow: hidden;
+  background-image: linear-gradient(
+    220deg,
+    hsl(130deg 89% 50%) 0%,
+    hsl(131deg 84% 54%) 2%,
+    hsl(134deg 80% 56%) 5%,
+    hsl(139deg 76% 57%) 7%,
+    hsl(144deg 72% 57%) 10%,
+    hsl(150deg 68% 57%) 13%,
+    hsl(157deg 65% 56%) 16%,
+    hsl(165deg 63% 55%) 19%,
+    hsl(173deg 61% 53%) 22%,
+    hsl(180deg 60% 51%) 26%,
+    hsl(186deg 71% 51%) 29%,
+    hsl(190deg 91% 48%) 33%,
+    hsl(197deg 80% 60%) 38%,
+    hsl(205deg 78% 65%) 42%,
+    hsl(215deg 76% 69%) 47%,
+    hsl(226deg 74% 72%) 52%,
+    hsl(240deg 73% 75%) 58%,
+    hsl(253deg 76% 73%) 64%,
+    hsl(263deg 79% 70%) 70%,
+    hsl(270deg 82% 68%) 77%,
+    hsl(276deg 84% 65%) 84%,
+    hsl(282deg 86% 61%) 92%,
+    hsl(286deg 89% 55%) 100%
+  );
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.pathRadical {
+  fill: hsl(286deg 89% 55%);
+}
+.pathGuess {
+  fill: hsl(197deg 80% 60%);
+}
+.pathSuccess {
+  fill: hsl(120deg 80% 60%);
+}
+.path {
+  fill-opacity: 0;
+  animation: pathOpacity 1s ease-in forwards;
+}  
+@keyframes pathOpacity{
+  0%  {fill-opacity:0;}
+  100%{fill-opacity:1;}
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+}
+.App {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  padding: 0px;
+  text-align: center;
+  color: #333 !important;
+}
+
+.adm-card {
+  border-radius: 0px !important;
+}
+
+.adm-card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
