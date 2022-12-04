@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/hanzi-game/static/css/main.68f5b6e5.css",
+    "main.js": "/hanzi-game/static/js/main.e4dadf48.js",
+    "static/media/empty.svg": "/hanzi-game/static/media/empty.f2b844b21ec850bdec1912ad99067e9f.svg",
+    "static/media/default.svg": "/hanzi-game/static/media/default.1f281972c41211594f594eb8431617c7.svg",
+    "static/media/busy.svg": "/hanzi-game/static/media/busy.c4668539d4172c45989782acfa8f0d95.svg",
+    "static/media/disconnected.svg": "/hanzi-game/static/media/disconnected.9c7ea75e5abe3883ac5dfaf2cce1ae80.svg",
+    "static/media/spin.svg": "/hanzi-game/static/media/spin.a71ffb170f2356071b67492c9ea611fe.svg",
+    "static/media/slider-thumb.svg": "/hanzi-game/static/media/slider-thumb.3d161c8488f6d47e9819.svg",
+    "static/media/empty-icon.svg": "/hanzi-game/static/media/empty-icon.0e5fd2879f6036c6db04b701757e1f6c.svg",
+    "index.html": "/hanzi-game/index.html",
+    "main.68f5b6e5.css.map": "/hanzi-game/static/css/main.68f5b6e5.css.map",
+    "main.e4dadf48.js.map": "/hanzi-game/static/js/main.e4dadf48.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.68f5b6e5.css",
+    "static/js/main.e4dadf48.js"
+  ]
+}
