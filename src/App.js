@@ -1,20 +1,26 @@
 import React, { useEffect, useState, useRef } from 'react'
 import './App.css'
 import { Card, Button, Input } from 'antd-mobile'
-import config from './config.json'
-
-const {
-  candidates,
-  candidateStrokes,
-  candidateCommonStrokes,
-  targetNumCharacters,
-  targetNumStrokes,
-  radicalHints,
-  pinyin,
-  defs
-} = config
+import configs from './config.json'
 
 function App () {
+  const [currentGame, setCurrentGame] = useState(0)
+  return <Game config={configs[currentGame]} setCurrentGame={setCurrentGame} />
+}
+
+function Game (props) {
+  const { config, setCurrentGame } = props
+  const {
+    candidates,
+    candidateStrokes,
+    candidateCommonStrokes,
+    targetNumCharacters,
+    targetNumStrokes,
+    radicalHints,
+    pinyin,
+    defs
+  } = config
+
   const [paths, setPaths] = useState([])
   const [chosen, setChosen] = useState([])
   const [guessCount, setGuessCount] = useState(0)
@@ -67,63 +73,118 @@ function App () {
         //title='上字'
         titleStyle={{ fontSize: '4rem' }}
       >
-        {!success && (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div
-              style={{
-                justifyContent: 'space-between',
-                flex: '1',
-                padding: '0px 15%'
-              }}
-            >
-              {candidates.map(candidate => (
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div
+            style={{
+              justifyContent: 'space-between',
+              flex: '1',
+              padding: '0px 15%'
+            }}
+          >
+            {candidates.map(candidate => {
+              // all the strokes for this candidate
+              const nonMatchingStrokeItems = candidateStrokes[candidate].map(
+                (path, index) => ({
+                  stroke: path,
+                  index
+                })
+              )
+
+              const thisCandidateCommonStrokes = candidateCommonStrokes[
+                candidate
+              ].reverse.flat()
+
+              // strokes for this candidate that match one of the target characters
+              const matchingStrokeItems = thisCandidateCommonStrokes
+                .filter(x => {
+                  // only include strokes that have not already shown up in other clicked candidates
+                  const previousMatches = chosen
+                    .slice(0, chosen.indexOf(candidate))
+                    .map(character => candidateCommonStrokes[character].reverse)
+                    .flat(2)
+
+                  const previousHeads = previousMatches.map(
+                    ({ componentPath }) =>
+                      componentPath.substring(
+                        componentPath.length - 1,
+                        componentPath.length
+                      )
+                  )
+
+                  const thisHead = x.componentPath.substring(
+                    x.componentPath.length - 1,
+                    x.componentPath.length
+                  )
+                  const result =
+                    !thisCandidateCommonStrokes.some(({ componentPath, stroke }) => {
+                      return componentPath.includes(`${thisHead}/`) && stroke === x.stroke
+
+                    }) &&
+                    !previousHeads.some(
+                      previousHead => previousHead === thisHead
+                    )
+                  return result
+                })
+                .map(x => ({
+                  ...x,
+                  match: true
+                }))
+
+              const allStrokeItems = [
+                ...nonMatchingStrokeItems,
+                ...(chosen.includes(candidate) ? matchingStrokeItems : [])
+              ]
+
+              return (
                 <svg
                   key={candidate}
                   viewBox='0 0 1024 1024'
                   style={{
                     aspectRatio: '1/1',
-                    border: '1px solid #fefefe',
+                    border: `1px solid ${
+                      chosen.includes(candidate)
+                        ? 'hsl(197deg 80% 60%)'
+                        : '#fefefe'
+                    }`,
                     borderRadius: '4px',
-                    height: '30px',
-                    margin: '8px'
+                    height: chosen.includes(candidate) ? '45px' : '30px',
+                    margin: '8px',
+                    cursor: success ? 'initial' : 'pointer'
                   }}
                   onClick={() => {
-                    setPaths(existing => [
-                      ...existing,
-                      candidateCommonStrokes[candidate]
-                    ])
-                    setChosen(existing => [...existing, candidate])
-                    setGuessCount(g => (g += 1))
+                    if (!success) {
+                      setPaths(existing => [
+                        ...existing,
+                        {
+                          ...candidateCommonStrokes[candidate],
+                          character: candidate
+                        }
+                      ])
+                      setChosen(existing => [...existing, candidate])
+                      setGuessCount(g => (g += 1))
+                    }
                   }}
                 >
                   <g transform='scale(1, -1) translate(0, -900)'>
-                    {[
-                      ...candidateStrokes[candidate].map((path, index) => ({
-                        stroke: path,
-                        index
-                      })),
-                      ...(chosen.includes(candidate)
-                        ? candidateCommonStrokes[candidate].reverse
-                            .flat()
-                            .map(x => ({ ...x, match: true }))
-                        : [])
-                    ].map(({ stroke, match, index }) => (
-                      <path
-                        className={`path ${match ? 'pathRadical' : ''}`}
-                        style={{
-                          opacity:
-                            chosen.includes(candidate) && !match ? 0.1 : 1
-                        }}
-                        key={index}
-                        d={stroke}
-                      ></path>
-                    ))}
+                    {allStrokeItems.map(
+                      ({ stroke, match, index, componentPath }) => (
+                        <path
+                          className={`path ${match ? 'pathMatch' : ''}`}
+                          style={{
+                            opacity:
+                              chosen.includes(candidate) && !match ? 0.1 : 1
+                          }}
+                          key={`${componentPath}${index}`}
+                          d={stroke}
+                        ></path>
+                      )
+                    )}
                   </g>
                 </svg>
-              ))}
-            </div>
+              )
+            })}
           </div>
-        )}
+        </div>
 
         <div
           style={{
@@ -175,7 +236,10 @@ function App () {
                 <h2>{pinyin}</h2>
                 <>
                   {defs.map((d, i) => (
-                    <span key={d}>{d}{i === defs.length - 1 ? '' : ', '}</span> 
+                    <span key={d}>
+                      {d}
+                      {i === defs.length - 1 ? '' : ', '}
+                    </span>
                   ))}
                 </>
               </>
@@ -189,6 +253,15 @@ function App () {
         <p style={{ flex: '0', fontSize: '1rem' }}>
           {guessCount > 0 && guessCount.toLocaleString('zh-u-nu-hanidec')}
         </p>
+        {success && config.length > 1 && (
+          <div style={{ flex: '0' }}>
+            <Button
+              onClick={() => setCurrentGame(g => (g + 1) % (config.length - 1)) }
+            >
+              Next
+            </Button>
+          </div>
+        )}
 
         <p style={{ flex: '0', fontSize: '1rem', color: '#bbb' }}>
           by{' '}
