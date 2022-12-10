@@ -89,31 +89,37 @@ export const gameSlice = createSlice({
 
       state.candidatePaths[chosen] = matchingStrokeItems
 
-      //const newTargetPaths = [...state.chosenCandidates, chosen].map(character => candidateCommonStrokes[character].forward)
-
       const newTargetPaths = state.targetPaths.map((target, index) => {
-        return [...target, ...candidateCommonStrokes[chosen].forward[index]]
+        const strokeItemsToAdd = candidateCommonStrokes[chosen].forward[
+          index
+        ].filter(
+          ({ stroke }) => !target.map(({ stroke }) => stroke).includes(stroke)
+        )
+        const strokeItemsToAddDistinctByStroke = strokeItemsToAdd.filter(
+          (item, index) =>
+            strokeItemsToAdd.findIndex(
+              ({ stroke }) => stroke === item.stroke
+            ) === index
+        )
+        return [...target, ...strokeItemsToAddDistinctByStroke]
       })
 
       state.targetPaths = newTargetPaths
 
       state.remaining = newTargetPaths.map((paths, index) => {
-        return targetNumStrokes[index] - new Set(paths.map(p => p.stroke)).size
+        return targetNumStrokes[index] - paths.length
       })
 
       const totalRemaining = state.remaining.reduce((a, b) => a + b, 0)
       state.success = totalRemaining <= 0
 
-      const success = totalRemaining <= 0
-      const pointRanking = [6, 5, 4, 3, 2, 1]
+      const pointRanking = [5, 5, 4, 4, 3, 3, 2, 2]
       const pointsMultiplier = pointRanking[guessCount - 1] || 1
 
       state.score += Math.ceil(
         ((state.totalRemaining - totalRemaining) * pointsMultiplier) / 10
       )
       state.totalRemaining = totalRemaining
-
-      state.success = success
     }
   },
   extraReducers: builder => {
@@ -140,7 +146,6 @@ export const gameSlice = createSlice({
           pinyin,
           defs
         }
-        state.score = 0
         state.success = false
         state.guessCount = 0
         state.candidatePaths = {}

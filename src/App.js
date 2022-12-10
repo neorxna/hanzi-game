@@ -171,19 +171,17 @@ function Game (props) {
               viewBox='0 0 1024 1024'
             >
               <g transform='scale(1, -1) translate(0, -900)'>
-                {[...new Set(targetPaths[i].map(({ stroke }) => stroke))].map(
-                  stroke => {
-                    return (
-                      <path
-                        className={`path pathGuess ${
-                          remaining[i] <= 0 ? 'pathSuccess' : ''
-                        }`}
-                        d={stroke}
-                        key={stroke}
-                      ></path>
-                    )
-                  }
-                )}
+                {targetPaths[i].map(({ stroke }) => {
+                  return (
+                    <path
+                      className={`path pathGuess ${
+                        remaining[i] <= 0 ? 'pathSuccess' : ''
+                      }`}
+                      d={stroke}
+                      key={stroke}
+                    ></path>
+                  )
+                })}
               </g>
             </svg>
           ))}
