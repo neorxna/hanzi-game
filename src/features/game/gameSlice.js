@@ -15,7 +15,7 @@ const initialState = {
   remaining: null
 }
 
-const LAST_GAME = 19
+const LAST_GAME = 95
 
 export const newGameAsync = createAsyncThunk(
   'game/new',
