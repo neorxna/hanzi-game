@@ -1,66 +1,17 @@
 import React, { useEffect, useState, useRef } from 'react'
 import './App.css'
-import { Card, Button, Input } from 'antd-mobile'
-import configs from './config.json'
+import { Card, Button, Input, DotLoading } from 'antd-mobile'
+import { useDispatch, useSelector } from 'react-redux'
+import { chooseCandidate, newGameAsync } from './features/game/gameSlice'
 
 function App () {
-  const [currentGame, setCurrentGame] = useState(0)
-  return <Game config={configs[currentGame]} setCurrentGame={setCurrentGame} />
-}
+  const dispatch = useDispatch()
 
-function Game (props) {
-  const { config, setCurrentGame } = props
-  const {
-    candidates,
-    candidateStrokes,
-    candidateCommonStrokes,
-    targetNumCharacters,
-    targetNumStrokes,
-    radicalHints,
-    pinyin,
-    defs
-  } = config
+  const ready = useSelector(state => state.game.status === 'ready')
 
-  const [paths, setPaths] = useState([])
-  const [chosen, setChosen] = useState([])
-  const [guessCount, setGuessCount] = useState(0)
-
-  /*
   useEffect(() => {
-    fetchPaths('__radical__')
+    setTimeout(() => dispatch(newGameAsync()), 1000)
   }, [])
-
-  const fetchPaths = _guess => {
-    setLoading(true)
-    ;(async () => {
-      const url = `${API_URL}/character/stroke-match/${_guess}`
-      const result = await axios.get(url)
-      if (result.data && result.data.paths) {
-        setSuccess(result.data.success)
-        setPaths(existingPaths => {
-          const existingIndices = existingPaths.map(({ index }) => index)
-          const newPaths = result.data.paths.filter(
-            ({ index }) => !existingIndices.includes(index)
-          )
-          return [...existingPaths, ...newPaths]
-        })
-      }
-      setLoading(false)
-    })()
-  }*/
-
-  const remaining = targetNumStrokes.map((targetStrokes, index) => {
-    const numStrokes = new Set(
-      paths
-        .map(p => p.forward)
-        .map(p => p[index])
-        .flat()
-        .map(p => p.stroke)
-    ).size
-    return targetStrokes - numStrokes
-  })
-  const totalRemaining = remaining.reduce((a, b) => a + b, 0)
-  const success = totalRemaining <= 0
 
   return (
     <div className='App'>
@@ -73,12 +24,58 @@ function Game (props) {
         //title='上字'
         titleStyle={{ fontSize: '4rem' }}
       >
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        {ready ? (
+          <>
+            <Game />
+            <p style={{ flex: '0', fontSize: '1rem', color: '#bbb' }}>
+              by{' '}
+              <a
+                style={{ color: '#bbb', textDecoration: 'none' }}
+                href='https://milquetoast.space'
+              >
+                milquetoast
+              </a>
+            </p>
+          </>
+        ) : (
+          <DotLoading />
+        )}
+      </Card>
+    </div>
+  )
+}
+
+function Game (props) {
+  const dispatch = useDispatch()
+  const game = useSelector(state => state.game)
+
+  const {
+    status,
+    currentGame,
+    chosenCandidates,
+    gameIndex,
+    targetPaths,
+    candidatePaths,
+    score,
+    guessCount,
+    success,
+    remaining,
+    totalRemaining
+  } = game
+
+  const { candidates, candidateStrokes, pinyin, defs } = currentGame
+
+  return (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {!success && (
           <div
             style={{
-              justifyContent: 'space-between',
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'space-around',
               flex: '1',
-              padding: '0px 15%'
+              padding: '20px 15%'
             }}
           >
             {candidates.map(candidate => {
@@ -90,49 +87,12 @@ function Game (props) {
                 })
               )
 
-              const thisCandidateCommonStrokes = candidateCommonStrokes[
-                candidate
-              ].reverse.flat()
-
-              // strokes for this candidate that match one of the target characters
-              const matchingStrokeItems = thisCandidateCommonStrokes
-                .filter(x => {
-                  // only include strokes that have not already shown up in other clicked candidates
-                  const previousMatches = chosen
-                    .slice(0, chosen.indexOf(candidate))
-                    .map(character => candidateCommonStrokes[character].reverse)
-                    .flat(2)
-
-                  const previousHeads = previousMatches.map(
-                    ({ componentPath }) =>
-                      componentPath.substring(
-                        componentPath.length - 1,
-                        componentPath.length
-                      )
-                  )
-
-                  const thisHead = x.componentPath.substring(
-                    x.componentPath.length - 1,
-                    x.componentPath.length
-                  )
-                  const result =
-                    !thisCandidateCommonStrokes.some(({ componentPath, stroke }) => {
-                      return componentPath.includes(`${thisHead}/`) && stroke === x.stroke
-
-                    }) &&
-                    !previousHeads.some(
-                      previousHead => previousHead === thisHead
-                    )
-                  return result
-                })
-                .map(x => ({
-                  ...x,
-                  match: true
-                }))
+              // matching strokes for this candidate
+              const matchingStrokeItems = candidatePaths[candidate] || []
 
               const allStrokeItems = [
                 ...nonMatchingStrokeItems,
-                ...(chosen.includes(candidate) ? matchingStrokeItems : [])
+                ...matchingStrokeItems
               ]
 
               return (
@@ -142,26 +102,22 @@ function Game (props) {
                   style={{
                     aspectRatio: '1/1',
                     border: `1px solid ${
-                      chosen.includes(candidate)
+                      chosenCandidates.includes(candidate)
                         ? 'hsl(197deg 80% 60%)'
                         : '#fefefe'
                     }`,
                     borderRadius: '4px',
-                    height: chosen.includes(candidate) ? '45px' : '30px',
-                    margin: '8px',
+                    height: chosenCandidates.includes(candidate)
+                      ? '40px'
+                      : '32px',
+                    margin: chosenCandidates.includes(candidate)
+                      ? '4px'
+                      : '8px',
                     cursor: success ? 'initial' : 'pointer'
                   }}
                   onClick={() => {
                     if (!success) {
-                      setPaths(existing => [
-                        ...existing,
-                        {
-                          ...candidateCommonStrokes[candidate],
-                          character: candidate
-                        }
-                      ])
-                      setChosen(existing => [...existing, candidate])
-                      setGuessCount(g => (g += 1))
+                      dispatch(chooseCandidate(candidate))
                     }
                   }}
                 >
@@ -172,9 +128,11 @@ function Game (props) {
                           className={`path ${match ? 'pathMatch' : ''}`}
                           style={{
                             opacity:
-                              chosen.includes(candidate) && !match ? 0.1 : 1
+                              chosenCandidates.includes(candidate) && !match
+                                ? 0.1
+                                : 1
                           }}
-                          key={`${componentPath}${index}`}
+                          key={`${stroke} ${index} ${componentPath}`}
                           d={stroke}
                         ></path>
                       )
@@ -184,96 +142,83 @@ function Game (props) {
               )
             })}
           </div>
-        </div>
-
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flex: '1'
-          }}
-        >
-          <div style={{ flex: '1' }}>
-            {[0, 1].map((_, i) => (
-              <svg
-                key={i}
-                style={{
-                  height: '20vh',
-                  margin: '0.5rem',
-                  aspectRatio: '1/1',
-                  border: `2px solid ${
-                    remaining[i] <= 0 ? 'hsl(120deg 80% 60%)' : '#e0e0e0'
-                  }`,
-                  borderRadius: '8px'
-                }}
-                viewBox='0 0 1024 1024'
-              >
-                <g transform='scale(1, -1) translate(0, -900)'>
-                  {paths
-                    .map(p => p['forward'][i])
-                    .flat()
-                    .map(({ index, stroke, radical }) => {
-                      return (
-                        <path
-                          className={`path ${
-                            radical ? 'pathRadical' : 'pathGuess'
-                          } ${remaining[i] <= 0 ? 'pathSuccess' : ''}`}
-                          d={stroke}
-                          key={index}
-                        ></path>
-                      )
-                    })}
-                </g>
-              </svg>
-            ))}
-          </div>
-        </div>
-        {
-          <p style={{ flex: '1', fontSize: '1rem' }}>
-            {success ? (
-              <>
-                <h2>{pinyin}</h2>
-                <>
-                  {defs.map((d, i) => (
-                    <span key={d}>
-                      {d}
-                      {i === defs.length - 1 ? '' : ', '}
-                    </span>
-                  ))}
-                </>
-              </>
-            ) : (
-              `${totalRemaining} stroke${
-                totalRemaining > 1 ? 's' : ''
-              } remaining`
-            )}
-          </p>
-        }
-        <p style={{ flex: '0', fontSize: '1rem' }}>
-          {guessCount > 0 && guessCount.toLocaleString('zh-u-nu-hanidec')}
-        </p>
-        {success && config.length > 1 && (
-          <div style={{ flex: '0' }}>
-            <Button
-              onClick={() => setCurrentGame(g => (g + 1) % (config.length - 1)) }
-            >
-              Next
-            </Button>
-          </div>
         )}
+      </div>
 
-        <p style={{ flex: '0', fontSize: '1rem', color: '#bbb' }}>
-          by{' '}
-          <a
-            style={{ color: '#bbb', textDecoration: 'none' }}
-            href='https://milquetoast.space'
-          >
-            milquetoast
-          </a>
-        </p>
-      </Card>
-    </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flex: '1'
+        }}
+      >
+        <div style={{ flex: '1' }}>
+          {[0, 1].map((_, i) => (
+            <svg
+              key={i}
+              style={{
+                height: '20vh',
+                margin: '0.5rem',
+                aspectRatio: '1/1',
+                border: `2px solid ${
+                  remaining[i] <= 0 ? 'hsl(120deg 80% 60%)' : '#e0e0e0'
+                }`,
+                borderRadius: '8px'
+              }}
+              viewBox='0 0 1024 1024'
+            >
+              <g transform='scale(1, -1) translate(0, -900)'>
+                {[...new Set(targetPaths[i].map(({ stroke }) => stroke))].map(
+                  stroke => {
+                    return (
+                      <path
+                        className={`path pathGuess ${
+                          remaining[i] <= 0 ? 'pathSuccess' : ''
+                        }`}
+                        d={stroke}
+                        key={stroke}
+                      ></path>
+                    )
+                  }
+                )}
+              </g>
+            </svg>
+          ))}
+        </div>
+      </div>
+      {
+        <div style={{ flex: '1', fontSize: '1rem' }}>
+          {success ? (
+            <p>
+              <h2>{pinyin}</h2>
+              <>
+                {defs.map((d, i) => (
+                  <span key={d}>
+                    {d}
+                    {i === defs.length - 1 ? '' : ', '}
+                  </span>
+                ))}
+              </>
+            </p>
+          ) : (
+            <p>
+              {`${totalRemaining} stroke${
+                totalRemaining > 1 ? 's' : ''
+              } remaining`}
+            </p>
+          )}
+          <p>
+            <strong>{score}</strong> points
+          </p>
+          {success && (
+            <div style={{ flex: '0' }}>
+              <Button onClick={() => dispatch(newGameAsync())}>Next</Button>
+            </div>
+          )}
+        </div>
+      }
+    </>
   )
 }
 
