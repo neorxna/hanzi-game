@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect } from 'react'
 import './App.css'
 import { Card, Button, Input, DotLoading } from 'antd-mobile'
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,7 +14,9 @@ function App () {
   }, [])
 
   const footer = (
-    <p style={{ flex: '0', padding: '12px', fontSize: '0.8rem', color: '#bbb' }}>
+    <p
+      style={{ flex: '0', padding: '12px', fontSize: '0.8rem', color: '#bbb' }}
+    >
       By <a href='https://milquetoast.space'>milquetoast</a>. Vocabulary from{' '}
       <a href='https://github.com/kerrickstaley/Chinese-Vocab-List'>
         Chinese Vocab List
@@ -53,14 +55,11 @@ function Game (props) {
   const game = useSelector(state => state.game)
 
   const {
-    status,
     currentGame,
     chosenCandidates,
-    gameIndex,
     targetPaths,
     candidatePaths,
     score,
-    guessCount,
     success,
     remaining,
     totalRemaining
