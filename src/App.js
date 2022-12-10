@@ -13,6 +13,17 @@ function App () {
     setTimeout(() => dispatch(newGameAsync()), 1000)
   }, [])
 
+  const footer = (
+    <p style={{ flex: '0', padding: '12px', fontSize: '0.8rem', color: '#bbb' }}>
+      By <a href='https://milquetoast.space'>milquetoast</a>. Vocabulary from{' '}
+      <a href='https://github.com/kerrickstaley/Chinese-Vocab-List'>
+        Chinese Vocab List
+      </a>
+      . Character graphics and data from{' '}
+      <a href='https://github.com/skishore/makemeahanzi'>Make me a Hanzi</a>.
+    </p>
+  )
+
   return (
     <div className='App'>
       <Card
@@ -27,15 +38,7 @@ function App () {
         {ready ? (
           <>
             <Game />
-            <p style={{ flex: '0', fontSize: '1rem', color: '#bbb' }}>
-              by{' '}
-              <a
-                style={{ color: '#bbb', textDecoration: 'none' }}
-                href='https://milquetoast.space'
-              >
-                milquetoast
-              </a>
-            </p>
+            {footer}
           </>
         ) : (
           <DotLoading />
