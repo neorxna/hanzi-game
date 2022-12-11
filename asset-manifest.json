@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/hanzi-game/static/css/main.dc007fc8.css",
-    "main.js": "/hanzi-game/static/js/main.ad6c1fa3.js",
+    "main.js": "/hanzi-game/static/js/main.732e510a.js",
     "static/media/empty.svg": "/hanzi-game/static/media/empty.f2b844b21ec850bdec1912ad99067e9f.svg",
     "static/media/default.svg": "/hanzi-game/static/media/default.1f281972c41211594f594eb8431617c7.svg",
     "static/media/busy.svg": "/hanzi-game/static/media/busy.c4668539d4172c45989782acfa8f0d95.svg",
@@ -11,10 +11,10 @@
     "static/media/empty-icon.svg": "/hanzi-game/static/media/empty-icon.0e5fd2879f6036c6db04b701757e1f6c.svg",
     "index.html": "/hanzi-game/index.html",
     "main.dc007fc8.css.map": "/hanzi-game/static/css/main.dc007fc8.css.map",
-    "main.ad6c1fa3.js.map": "/hanzi-game/static/js/main.ad6c1fa3.js.map"
+    "main.732e510a.js.map": "/hanzi-game/static/js/main.732e510a.js.map"
   },
   "entrypoints": [
     "static/css/main.dc007fc8.css",
-    "static/js/main.ad6c1fa3.js"
+    "static/js/main.732e510a.js"
   ]
 }
