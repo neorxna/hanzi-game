@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
+const LAST_GAME = 95
+
 const initialState = {
   status: 'loading',
   currentGame: {},
@@ -15,7 +17,15 @@ const initialState = {
   remaining: null
 }
 
-const LAST_GAME = 95
+function shuffleArray (array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[array[i], array[j]] = [array[j], array[i]]
+  }
+}
+
+const order = new Array(LAST_GAME).fill(0).map((_, index) => index + 1)
+shuffleArray(order)
 
 export const newGameAsync = createAsyncThunk(
   'game/new',
@@ -24,7 +34,7 @@ export const newGameAsync = createAsyncThunk(
     const { gameIndex } = game
     const next = gameIndex + 1 > LAST_GAME ? 1 : gameIndex + 1
     const response = await axios.get(
-      `${process.env.PUBLIC_URL}/games/game_${next}.json`
+      `${process.env.PUBLIC_URL}/games/game_${order[next]}.json`
     )
     return response.data
   }
