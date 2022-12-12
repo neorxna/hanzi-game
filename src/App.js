@@ -69,15 +69,14 @@ function Game (props) {
 
   return (
     <>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {!success && (
+      <div style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}>
           <div
             style={{
               display: 'flex',
               flexWrap: 'wrap',
-              justifyContent: 'space-around',
               flex: '1',
-              padding: '20px 15%'
+              padding: '20px 0px',
+              maxWidth: '400px'
             }}
           >
             {candidates.map(candidate => {
@@ -129,6 +128,7 @@ function Game (props) {
                         <path
                           className={`path ${match ? 'pathMatch' : ''}`}
                           style={{
+                            animationDelay: `${index * 0.1}s`,
                             opacity:
                               chosenCandidates.includes(candidate) && !match
                                 ? 0.1
@@ -144,7 +144,6 @@ function Game (props) {
               )
             })}
           </div>
-        )}
       </div>
 
       <div
@@ -156,40 +155,43 @@ function Game (props) {
         }}
       >
         <div style={{ flex: '1' }}>
-          {[0, 1].map((_, i) => (
-            <svg
-              key={i}
-              style={{
-                height: '20vh',
-                margin: '0.5rem',
-                aspectRatio: '1/1',
-                border: `2px solid ${
-                  remaining[i] <= 0 ? 'hsl(120deg 80% 60%)' : '#e0e0e0'
-                }`,
-                borderRadius: '8px'
-              }}
-              viewBox='0 0 1024 1024'
-            >
-              <g transform='scale(1, -1) translate(0, -900)'>
-                {targetPaths[i].map(({ stroke }) => {
-                  return (
-                    <path
-                      className={`path pathGuess ${
-                        remaining[i] <= 0 ? 'pathSuccess' : ''
-                      }`}
-                      d={stroke}
-                      key={stroke}
-                    ></path>
-                  )
-                })}
-              </g>
-            </svg>
-          ))}
+          {[0, 1].map((_, i) => {
+            return (
+              <svg
+                key={i}
+                style={{
+                  height: '20vh',
+                  margin: '0.5rem',
+                  aspectRatio: '1/1',
+                  border: `2px solid ${
+                    remaining[i] <= 0 ? 'hsl(120deg 80% 60%)' : '#e0e0e0'
+                  }`,
+                  borderRadius: '8px'
+                }}
+                viewBox='0 0 1024 1024'
+              >
+                <g transform='scale(1, -1) translate(0, -900)'>
+                  {targetPaths[i].map(({ stroke, index }) => {
+                    return (
+                      <path
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                        className={`path pathGuess ${
+                          remaining[i] <= 0 ? 'pathSuccess' : ''
+                        }`}
+                        d={stroke}
+                        key={stroke}
+                      ></path>
+                    )
+                  })}
+                </g>
+              </svg>
+            )
+          })}
         </div>
       </div>
       {
         <div style={{ flex: '1', fontSize: '1rem' }}>
-          {success ? (
+          {success && (
             <p>
               <h2>{pinyin}</h2>
               <>
@@ -201,19 +203,13 @@ function Game (props) {
                 ))}
               </>
             </p>
-          ) : (
-            <p>
-              {`${totalRemaining} stroke${
-                totalRemaining > 1 ? 's' : ''
-              } remaining`}
-            </p>
           )}
           <p>
             <strong>{score}</strong> points
           </p>
           {success && (
             <div style={{ flex: '0' }}>
-              <Button onClick={() => dispatch(newGameAsync())}>Next</Button>
+              <Button onClick={() => dispatch(newGameAsync())}>Play another</Button>
             </div>
           )}
         </div>

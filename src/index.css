@@ -48,8 +48,8 @@ body {
 }
 
 .path {
-  fill-opacity: 0;
-  animation: pathOpacity 1s ease-in forwards;
+  fill-opacity: 0; 
+  animation: pathOpacity 1s ease-in forwards; 
 }
 
 @keyframes pathOpacity {
