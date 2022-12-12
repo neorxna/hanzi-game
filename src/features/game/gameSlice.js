@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
 
-const LAST_GAME = 95
+const LAST_GAME = 100
 
 const initialState = {
   status: 'loading',
